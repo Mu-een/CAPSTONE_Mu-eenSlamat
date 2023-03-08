@@ -148,7 +148,7 @@ class Event {
     fetchEvents(req, res) {
         const strQry = `SELECT id, eventName, eventDescription, 
         weightDivision, price, eventIMG
-        FROM events;`;
+        FROM boxingEvents;`;
         db.query(strQry, (err, results)=> {
             if(err) throw err;
             res.status(200).json({results: results})
@@ -157,24 +157,29 @@ class Event {
     fetchEvent(req, res) {
         const strQry = `SELECT id, eventName, eventDescription, 
         weightDivision, price, eventIMG
-        FROM events
+        FROM boxingEvents
         WHERE id = ?;`;
         db.query(strQry, [req.params.id], (err, results)=> {
-            if(err) throw err;
-            res.status(200).json({results: results})
+            if(err){
+                res.status(400).json({err: "Unable to find selected event"});
+            } else {
+                res.status(200).json({results: results})
+            }
+            // if(err) throw err;
+            // res.status(200).json({results: results})
         });
 
     }
     addEvent(req, res) {
         const strQry = 
         `
-        INSERT INTO events
+        INSERT INTO boxingEvents
         SET ?;
         `;
         db.query(strQry,[req.body],
             (err)=> {
                 if(err){
-                    res.status(400).json({err: "Unable to insert a new record."});
+                    res.status(400).json({err: "Unable to insert a new event."});
                 }else {
                     res.status(200).json({msg: "Event saved"});
                 }
@@ -185,7 +190,7 @@ class Event {
     updateEvent(req, res) {
         const strQry = 
         `
-        UPDATE events
+        UPDATE boxingEvents
         SET ?
         WHERE id = ?
         `;
@@ -203,12 +208,12 @@ class Event {
     deleteEvent(req, res) {
         const strQry = 
         `
-        DELETE FROM events
+        DELETE FROM boxingEvents
         WHERE id = ?;
         `;
         db.query(strQry,[req.params.id], (err)=> {
             if(err) res.status(400).json({err: "The record was not found."});
-            res.status(200).json({msg: "A event was deleted."});
+            res.status(200).json({msg: "An event was deleted."});
         })
     }
 
