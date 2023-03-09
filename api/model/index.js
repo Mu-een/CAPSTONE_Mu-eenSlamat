@@ -219,7 +219,83 @@ class Event {
 
 }
 
+// cart
+class Cart {
+    fetchCart(req, res) {
+        const strQry = 
+        `
+        SELECT 
+        users.userId, users.firstName, users.lastName,users.emailAddress, boxingEvents.eventName,
+        boxingEvents.eventDescription, boxingEvents.eventIMG, boxingEvents.price
+        FROM users
+        INNER JOIN cart ON users.userId = cart.user_id
+        INNER JOIN boxingEvents ON cart.event_id = boxingEvents.id
+        WHERE cart.user_id = ${req.params.id};
+        `;
+        db.query(strQry, (err, results)=> {
+            if(err) throw err;
+            res.status(200).json({results: results})
+        });
+    }
+    addToCart(req, res) {
+        const strQry = 
+        `
+        INSERT INTO cart
+        SET ?;
+        `;
+        db.query(strQry, [req.body],
+            (err)=> {
+                if(err){
+                    res.status(400).json({err: "Unable to insert into cart."});
+                }else {
+                    res.status(200).json({msg: "Event added to cart"});
+                }
+            }
+        );
+    }
+    updateItemFromCart(req, res){
+        const strQry = 
+        `
+        UPDATE cart
+        SET ?
+        WHERE id = ?;
+        `;
+        db.query(strQry,[req.body, req.params.id],
+            (err)=> {
+                if(err){
+                    res.status(400).json({err: "Unable to update cart."});
+                }else {
+                    res.status(200).json({msg: "Cart updated"});
+                }
+            }
+        );    
+    }
+    deleteFromCart(req, res) {
+        const strQry = 
+        `
+        DELETE FROM cart
+        WHERE user_id = ?;
+        `;
+        db.query(strQry,[req.params.id], (err)=> {
+            if(err) res.status(400).json({err: "All cart items was not deleted."});
+            res.status(200).json({msg: "Cart deleted."});
+        })
+    }
+    deleteItemFromCart(req, res) {
+        const strQry = 
+        `
+        DELETE FROM cart
+        WHERE event_id = ?;
+        `;
+        db.query(strQry,[req.params.id], (err)=> {
+            if(err) res.status(400).json({err: "The cart item was not deleted."});
+            res.status(200).json({msg: "A cart item was deleted"});
+        })
+    }
+}
+
 module.exports = {
-    User, 
-    Event
+    User,
+    Event,
+    Cart
 }
